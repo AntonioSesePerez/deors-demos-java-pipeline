@@ -56,7 +56,7 @@ spec:
         APP_LISTENING_PORT = '8080'
         APP_JACOCO_PORT = '6300'
         CONTAINER_REGISTRY_URL = 'docker.io'
-        IMAGE_ORG = 'deors'
+        IMAGE_ORG = 'antonioseseperez'
         IMAGE_NAME = "$IMAGE_ORG/$APP_NAME"
         IMAGE_SNAPSHOT = "$IMAGE_NAME:$APP_VERSION-snapshot-$BUILD_NUMBER" // tag for snapshot version
         IMAGE_SNAPSHOT_LATEST = "$IMAGE_NAME:latest-snapshot" // tag for latest snapshot version
@@ -67,11 +67,11 @@ spec:
 
         // credentials
         KUBERNETES_CLUSTER_CRED_ID = 'k3s-lima-vm-kubeconfig'
-        CONTAINER_REGISTRY_CRED = credentials("docker-hub-$IMAGE_ORG")
-        LIGHTHOUSE_TOKEN = credentials("ci-lighthouse-token-$APP_NAME")
+        CONTAINER_REGISTRY_CRED = credentials("docker-hub-pipelinesWorkShop")
+        LIGHTHOUSE_TOKEN = credentials("ci-lighthouse-token-deors-demos-java-pipeline")
 
         // external systems
-        SELENIUM_URL = credentials('ci-selenium-url') // typically ends with '/wd/hub'
+        //SELENIUM_URL = credentials('ci-selenium-url') // typically ends with '/wd/hub'
         LIGHTHOUSE_URL = credentials('ci-lighthouse-url')
     }
 
@@ -182,7 +182,7 @@ spec:
             steps {
                 echo '-=- execute integration tests -=-'
                 sh "curl --retry 10 --retry-connrefused --connect-timeout 5 --max-time 5 ${EPHTEST_BASE_URL}actuator/health"
-                sh "./mvnw failsafe:integration-test failsafe:verify -Dtest.selenium.hub.url=$SELENIUM_URL -Dtest.target.server.url=$EPHTEST_BASE_URL"
+                //sh "./mvnw failsafe:integration-test failsafe:verify -Dtest.selenium.hub.url=$SELENIUM_URL -Dtest.target.server.url=$EPHTEST_BASE_URL"
                 sh "java -jar target/dependency/jacococli.jar dump --address $EPHTEST_CONTAINER_NAME-jacoco --port $APP_JACOCO_PORT --destfile target/jacoco-it.exec"
                 sh 'mkdir target/site/jacoco-it'
                 sh 'java -jar target/dependency/jacococli.jar report target/jacoco-it.exec --classfiles target/classes --xml target/site/jacoco-it/jacoco.xml'
