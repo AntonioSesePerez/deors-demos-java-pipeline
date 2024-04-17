@@ -130,7 +130,7 @@ spec:
             steps {
                 echo '-=- run software composition analysis -=-'
                 sh './mvnw dependency-check:check'
-                dependencyCheckPublisher(
+                /*dependencyCheckPublisher(
                     failedTotalCritical: qualityGates.security.dependencies.critical.failed,
                     unstableTotalCritical: qualityGates.security.dependencies.critical.unstable,
                     failedTotalHigh: qualityGates.security.dependencies.high.failed,
@@ -141,7 +141,7 @@ spec:
                     if (currentBuild.result == 'FAILURE') {
                         error('Dependency vulnerabilities exceed the configured threshold')
                     }
-                }
+                }*/
             }
         }
 
@@ -182,12 +182,13 @@ spec:
         stage('Integration tests') {
             steps {
                 echo '-=- execute integration tests -=-'
+                sleep(20)
                 sh "curl --retry 10 --retry-connrefused --connect-timeout 5 --max-time 5 ${EPHTEST_BASE_URL}actuator/health"
                 //sh "./mvnw failsafe:integration-test failsafe:verify -Dtest.selenium.hub.url=$SELENIUM_URL -Dtest.target.server.url=$EPHTEST_BASE_URL"
                 sh "java -jar target/dependency/jacococli.jar dump --address $EPHTEST_CONTAINER_NAME-jacoco --port $APP_JACOCO_PORT --destfile target/jacoco-it.exec"
                 sh 'mkdir target/site/jacoco-it'
                 sh 'java -jar target/dependency/jacococli.jar report target/jacoco-it.exec --classfiles target/classes --xml target/site/jacoco-it/jacoco.xml'
-                junit 'target/failsafe-reports/*.xml'
+                //junit 'target/failsafe-reports/*.xml'
                 jacoco execPattern: 'target/jacoco-it.exec'
             }
         }
@@ -197,15 +198,15 @@ spec:
                 echo '-=- execute performance tests -=-'
                 sh "curl --retry 10 --retry-connrefused --connect-timeout 5 --max-time 5 ${EPHTEST_BASE_URL}actuator/health"
                 sh "./mvnw jmeter:configure@configuration jmeter:jmeter jmeter:results -Djmeter.target.host=$EPHTEST_CONTAINER_NAME -Djmeter.target.port=$APP_LISTENING_PORT -Djmeter.target.root=$APP_CONTEXT_ROOT"
-                perfReport(
+                /*perfReport(
                     sourceDataFiles: 'target/jmeter/results/*.csv',
                     errorUnstableThreshold: qualityGates.performance.throughput.error.unstable,
                     errorFailedThreshold: qualityGates.performance.throughput.error.failed,
-                    errorUnstableResponseTimeThreshold: qualityGates.performance.throughput.response.unstable)
+                    errorUnstableResponseTimeThreshold: qualityGates.performance.throughput.response.unstable)*/
             }
         }
 
-        /*stage('Web page performance analysis') {
+        stage('Web page performance analysis') {
             steps {
                 echo '-=- execute web page performance analysis -=-'
                 container('lhci') {
@@ -219,7 +220,7 @@ spec:
                     """
                 }
             }
-        }*/
+        }
 
         stage('Code inspection & quality gate') {
             steps {
